@@ -100,6 +100,32 @@ const App = {
             console.error("Geocoding error:", err);
             return null;
         }
+    },
+
+    // Recommendation Engine
+    getRecommendations: async (cartItems) => {
+        const recommendations = [];
+        const allFoods = await App.fetchFoods();
+        
+        const hasBiryani = cartItems.some(item => item.name.toLowerCase().includes('biryani'));
+        const hasPizza = cartItems.some(item => item.name.toLowerCase().includes('pizza'));
+
+        if (hasBiryani) {
+            const coke = allFoods.find(f => f.name === 'Coke');
+            const c65 = allFoods.find(f => f.name === 'Chicken 65');
+            if (coke) recommendations.push(coke);
+            if (c65) recommendations.push(c65);
+        }
+
+        if (hasPizza) {
+            const fries = allFoods.find(f => f.name === 'French Fries');
+            const pepsi = allFoods.find(f => f.name === 'Pepsi');
+            if (fries) recommendations.push(fries);
+            if (pepsi) recommendations.push(pepsi);
+        }
+
+        // Filter out items already in cart
+        return recommendations.filter(rec => !cartItems.some(item => (item.id || item._id) === (rec.id || rec._id)));
     }
 };
 

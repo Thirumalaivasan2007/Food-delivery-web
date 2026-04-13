@@ -50,6 +50,16 @@
                 <!-- Cart items will be loaded here -->
             </div>
 
+            <!-- Recommendation Section -->
+            <div id="recommendations-container" style="display: none; margin-top: 3rem;">
+                <h3 style="font-size: 1.1rem; font-weight: 800; color: #fff; margin-bottom: 1.5rem; display: flex; align-items: center; gap: 0.5rem;">
+                    <i class="ri-sparkling-2-line text-primary"></i> Frequently Bought Together
+                </h3>
+                <div id="recommendations-list" style="display: flex; gap: 1.5rem; overflow-x: auto; padding-bottom: 1rem; scroll-behavior: smooth; -ms-overflow-style: none; scrollbar-width: none;">
+                    <!-- Recommendations injected here -->
+                </div>
+            </div>
+
             <div id="empty-cart" style="display: none; text-align: center; padding: 4rem;">
                 <i class="ri-shopping-bag-line" style="font-size: 4rem; color: var(--border-color);"></i>
                 <h3>Your cart is empty</h3>
@@ -75,17 +85,19 @@
     <script>
         App.checkAuth();
 
-        function renderCart() {
+        async function renderCart() {
             const cart = App.Cart.get();
             const list = document.getElementById('cart-list');
             const footer = document.getElementById('cart-footer');
             const empty = document.getElementById('empty-cart');
+            const recContainer = document.getElementById('recommendations-container');
             
             list.innerHTML = '';
             
             if (cart.length === 0) {
                 empty.style.display = 'block';
                 footer.style.display = 'none';
+                recContainer.style.display = 'none';
                 return;
             }
 
@@ -99,7 +111,7 @@
                 div.innerHTML = `
                     <div style="position: relative;">
                         <img src="${item.img}" alt="${item.name}">
-                        <div style="position: absolute; top: -10px; right: -10px; background: var(--primary-color); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; items-center justify-content: center; font-size: 0.75rem; font-weight: 700; border: 2px solid var(--surface-color);">${item.quantity || 1}</div>
+                        <div style="position: absolute; top: -10px; right: -10px; background: var(--primary-color); color: white; width: 24px; height: 24px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.75rem; font-weight: 700; border: 2px solid var(--surface-color);">${item.quantity || 1}</div>
                     </div>
                     <div class="cart-item-info">
                         <h3>${item.name}</h3>
@@ -115,6 +127,46 @@
             const total = App.Cart.getTotal();
             document.getElementById('subtotal').innerText = `₹${total.toFixed(2)}`;
             document.getElementById('total').innerText = `₹${total.toFixed(2)}`;
+
+            await renderRecommendations(cart);
+        }
+
+        async function renderRecommendations(cart) {
+            const recList = document.getElementById('recommendations-list');
+            const recContainer = document.getElementById('recommendations-container');
+            
+            const recommendations = await App.getRecommendations(cart);
+            
+            if (recommendations.length === 0) {
+                recContainer.style.display = 'none';
+                return;
+            }
+
+            recContainer.style.display = 'block';
+            recList.innerHTML = recommendations.map(item => `
+                <div class="menu-card" style="min-width: 220px; flex: 0 0 auto; background: var(--surface-color); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden;">
+                    <img src="${item.img}" style="width: 100%; height: 120px; object-fit: cover;">
+                    <div style="padding: 1rem;">
+                        <h4 style="font-size: 0.9rem; font-weight: 700; margin-bottom: 0.25rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${item.name}</h4>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem;">
+                            <span style="color: var(--primary-color); font-weight: 700; font-size: 0.9rem;">₹${item.price.toFixed(2)}</span>
+                            <button onclick='quickAdd(${JSON.stringify(item).replace(/'/g, "&apos;")})' class="btn btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; border-radius: 8px;">
+                                <i class="ri-add-line"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function quickAdd(item) {
+            App.Cart.add({
+                id: item._id,
+                name: item.name,
+                price: item.price,
+                img: item.img
+            });
+            renderCart();
         }
 
         function removeItem(index) {
