@@ -76,10 +76,17 @@ C:\Food app
 
 ## 🛡️ Admin Access
 
-Our application automatically seeds an initial admin user so you can test out dashboard features immediately:
-- **Portal**: [http://localhost:3000/admin.html](http://localhost:3000/admin.html)
-- **Email**: `admin@nexora.com`
-- **Password**: `admin123`
+To secure the admin dashboard, default credentials are no longer hardcoded. 
+You can define your own credentials in the `.env` file before starting the server:
+
+```env
+ADMIN_EMAIL=your_admin_email@example.com
+ADMIN_PASSWORD=your_secure_password
+```
+
+- **Admin Portal**: [http://localhost:3000/admin.html](http://localhost:3000/admin.html)
+
+Once set up, the application will automatically seed these credentials to the database securely.
 
 ---
 <div align="center">

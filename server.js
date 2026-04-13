@@ -35,16 +35,21 @@ const port = process.env.PORT || 3000;
 // Admin Seeding Function
 const seedAdmin = async () => {
     try {
+        if (!process.env.ADMIN_EMAIL || !process.env.ADMIN_PASSWORD) {
+            console.log("Admin credentials not fully provided in .env. Skipping admin seed check.");
+            return;
+        }
+        
         const adminExists = await User.findOne({ role: 'admin' });
         if (!adminExists) {
-            console.log("No admin found. Seeding default admin account...");
+            console.log("No admin found. Seeding admin account from environment variables...");
             await User.create({
                 name: 'System Admin',
-                email: 'admin@feastify.com',
-                password: 'admin123',
+                email: process.env.ADMIN_EMAIL,
+                password: process.env.ADMIN_PASSWORD,
                 role: 'admin'
             });
-            console.log("Admin account seeded successfully: admin@feastify.com / admin123");
+            console.log(`Admin account seeded successfully for: ${process.env.ADMIN_EMAIL}`);
         } else {
             console.log("Admin account already exists.");
         }
