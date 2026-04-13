@@ -124,6 +124,20 @@ const App = {
             if (pepsi) recommendations.push(pepsi);
         }
 
+        // Patch images with high-quality URLs for better aesthetics
+        const imageMap = {
+            'Coke': 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=800',
+            'Pepsi': 'https://images.unsplash.com/photo-1551028150-64b9f398f678?q=80&w=800',
+            'Chicken 65': 'https://images.unsplash.com/photo-1610057099443-fde8c4d50f91?q=80&w=800',
+            'French Fries': 'https://images.unsplash.com/photo-1573080496219-bb080dd4f877?q=80&w=800'
+        };
+
+        recommendations.forEach(item => {
+            if (imageMap[item.name]) {
+                item.img = imageMap[item.name];
+            }
+        });
+
         // Filter out items already in cart
         return recommendations.filter(rec => !cartItems.some(item => (item.id || item._id) === (rec.id || rec._id)));
     }

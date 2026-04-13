@@ -208,6 +208,17 @@
                         `).join('')}
                     </div>
 
+                    <div class="grid grid-cols-2 gap-4 py-6 border-y border-gray-800/50 my-6">
+                        <div>
+                            <div class="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Delivery Address</div>
+                            <div class="text-[10px] text-gray-400 font-medium leading-relaxed">${order.customerDetails.address}</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-[9px] font-black text-gray-500 uppercase tracking-widest mb-1">Payment Method</div>
+                            <div class="inline-block px-2 py-1 rounded bg-gray-800 text-gray-400 text-[9px] font-black ring-1 ring-border">${order.paymentMethod || 'COD'}</div>
+                        </div>
+                    </div>
+
                     <div class="mt-8 pt-8 border-t border-border flex justify-between items-center">
                         <div class="flex -space-x-3 overflow-hidden">
                             ${order.cartItems.slice(0, 3).map(item => `
@@ -235,8 +246,12 @@
                         </div>
                         <span class="font-black text-white">₹${order.totalAmount.toFixed(2)}</span>
                     </div>
-                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-tight">
+                    <div class="text-[10px] text-gray-500 font-bold uppercase tracking-tight mb-3">
                         ${order.cartItems.slice(0, 2).map(i => i.name).join(', ')}${order.cartItems.length > 2 ? '...' : ''}
+                    </div>
+                    <div class="pt-3 border-t border-gray-800 flex justify-between items-center">
+                        <span class="text-[9px] font-black text-gray-600 uppercase">${order.paymentMethod || 'COD'}</span>
+                        <span class="text-[9px] text-gray-600 font-medium truncate max-w-[120px]">${order.customerDetails.address}</span>
                     </div>
                 </div>
             `;

@@ -3,7 +3,33 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./db');
 const bcrypt = require('bcryptjs');
+const nodemailer = require('nodemailer');
 require('dotenv').config();
+
+// Nodemailer Transporter Setup
+const transporter = nodemailer.createTransport({
+    service: 'gmail',
+    auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+    }
+});
+
+// Admin Email Alert Helper
+const sendAdminAlert = async (subject, text) => {
+    try {
+        const mailOptions = {
+            from: process.env.EMAIL_USER,
+            to: 'thirumalaivasan944@gmail.com',
+            subject: `Feastify Alert: ${subject}`,
+            text: text
+        };
+        await transporter.sendMail(mailOptions);
+        console.log(`Admin alert sent: ${subject}`);
+    } catch (err) {
+        console.error("Email Alert Error:", err.message);
+    }
+};
 
 const Order = require('./models/Order');
 const User = require('./models/User');
@@ -43,12 +69,13 @@ const seedAdmin = async () => {
         const adminExists = await User.findOne({ role: 'admin' });
         if (!adminExists) {
             console.log("No admin found. Seeding admin account from environment variables...");
-            await User.create({
-                name: 'System Admin',
+            const admin = new User({
+                name: 'Feastify Admin',
                 email: process.env.ADMIN_EMAIL,
                 password: process.env.ADMIN_PASSWORD,
                 role: 'admin'
             });
+            await admin.save(); // Using save() ensures bcrypt hashing hook is triggered
             console.log(`Admin account seeded successfully for: ${process.env.ADMIN_EMAIL}`);
         } else {
             console.log("Admin account already exists.");
@@ -129,7 +156,12 @@ app.post('/api/register', async (req, res) => {
         const user = new User({ name, email, password, role: 'customer' });
         await user.save();
         
+        
         console.log(`User registered successfully: ${user.email} (ID: ${user._id})`);
+        
+        // Notification: New Signup
+        sendAdminAlert('New Customer Signup', `Customer ${name} (${email}) has joined Feastify!`);
+
         res.status(201).json({ 
             success: true, 
             message: 'User registered successfully', 
@@ -145,6 +177,16 @@ app.post('/api/register', async (req, res) => {
 // =======================
 // CATEGORY ROUTES
 // =======================
+// Fetch All Users (Admin only)
+app.get('/api/users', adminAuth, async (req, res) => {
+    try {
+        const users = await User.find({}).select('-password').sort({ createdAt: -1 });
+        res.status(200).json(users);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
 app.get('/api/categories', async (req, res) => {
     try {
         if (mongoose.connection.readyState !== 1) {
@@ -258,6 +300,12 @@ app.post('/api/auth/login', async (req, res) => {
         }
 
         const redirectPath = (user.role === 'admin') ? '/admin.html' : '/menu.html';
+        
+        // Security Notification: Admin Login
+        if (user.role === 'admin') {
+            sendAdminAlert('Admin Login Alert', `A successful login to the Admin account (${email}) was detected at ${new Date().toLocaleString()}.`);
+        }
+
         res.status(200).json({ 
             success: true, 
             message: 'Login successful', 
@@ -454,6 +502,10 @@ app.post('/api/orders/:id/customer-cancel', async (req, res) => {
         
         if (!order) return res.status(404).json({ success: false, message: 'Order not found' });
         console.log(`URGENT: Order ${id} cancelled by Customer`);
+
+        // Notification: Order Cancelled
+        sendAdminAlert('Order Cancelled (Action Required)', `Customer has cancelled Order #${id.slice(-6).toUpperCase()}. Please check the Admin Dashboard.`);
+
         res.status(200).json({ success: true, message: 'Order cancelled' });
     } catch (err) {
         res.status(500).json({ success: false, message: err.message });
