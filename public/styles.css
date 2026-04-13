@@ -18,12 +18,19 @@
     box-sizing: border-box;
 }
 
+/* Animations */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
 body {
     font-family: 'Outfit', sans-serif;
     background-color: var(--bg-color);
     color: var(--text-primary);
     line-height: 1.6;
     overflow-x: hidden;
+    animation: fadeIn 0.8s ease-out;
 }
 
 #app {
@@ -53,6 +60,7 @@ body {
     visibility: visible;
     transform: translateY(0);
     position: relative;
+    animation: fadeIn 0.5s ease-out;
 }
 
 /* Typography */
@@ -208,9 +216,9 @@ header {
 }
 
 .menu-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.4);
-    border-color: #444;
+    transform: translateY(-8px) scale(1.02);
+    box-shadow: 0 20px 40px rgba(255, 90, 0, 0.15);
+    border-color: var(--primary-color);
 }
 
 .card-img {

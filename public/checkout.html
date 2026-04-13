@@ -33,7 +33,12 @@
                         <input type="text" id="full-name" required placeholder="John Doe">
                     </div>
                     <div class="input-group">
-                        <label for="address">Delivery Address</label>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <label for="address" style="margin-bottom: 0;">Delivery Address</label>
+                            <button type="button" onclick="getCurrentLocation()" class="btn btn-text" style="font-size: 0.75rem; padding: 0; color: var(--primary-color); display: flex; align-items: center; gap: 4px;">
+                                <i class="ri-map-pin-line"></i> Use Current Location
+                            </button>
+                        </div>
                         <textarea id="address" required placeholder="Street name, Apartment, City..."></textarea>
                     </div>
                     <div class="input-group">
@@ -100,6 +105,44 @@
             localStorage.setItem('customerDetails', JSON.stringify(customerDetails));
             window.location.href = '/payment.html';
         });
+
+        async function getCurrentLocation() {
+            const btn = event.currentTarget;
+            const originalText = btn.innerHTML;
+            
+            if (!navigator.geolocation) {
+                alert("Geolocation is not supported by your browser");
+                return;
+            }
+
+            try {
+                btn.innerHTML = `<i class="ri-loader-4-line animate-spin"></i> Locating...`;
+                btn.disabled = true;
+
+                navigator.geolocation.getCurrentPosition(async (position) => {
+                    const { latitude, longitude } = position.coords;
+                    const address = await App.reverseGeocode(latitude, longitude);
+                    
+                    if (address) {
+                        document.getElementById('address').value = address;
+                    } else {
+                        alert("Could not retrieve address. Please enter it manually.");
+                    }
+                    
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                }, (err) => {
+                    console.error(err);
+                    alert("Location access denied or unavailable.");
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                });
+            } catch (err) {
+                console.error(err);
+                btn.innerHTML = originalText;
+                btn.disabled = false;
+            }
+        }
 
         renderSummary();
     </script>

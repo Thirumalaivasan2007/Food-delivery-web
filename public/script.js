@@ -88,6 +88,18 @@ const App = {
             minute: '2-digit',
             hour12: true
         });
+    },
+
+    // Geolocation Helper
+    reverseGeocode: async (lat, lon) => {
+        try {
+            const res = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}`);
+            const data = await res.json();
+            return data.display_name || 'Address not found';
+        } catch (err) {
+            console.error("Geocoding error:", err);
+            return null;
+        }
     }
 };
 
