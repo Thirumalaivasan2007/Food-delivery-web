@@ -1,6 +1,6 @@
 /**
- * CraveBites Core Script
- * Shared utilities for the multi-page food app.
+ * Feastify Core Script
+ * Shared utilities for the premium food delivery platform.
  */
 
 const API_BASE_URL = 'https://food-delivery-web-yo3r.onrender.com';

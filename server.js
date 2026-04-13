@@ -597,8 +597,23 @@ async function syncCategories() {
         }
     } catch (err) {
         console.error("Category sync error:", err);
+// Admin Test Email Route (Diagnostics)
+app.get('/api/admin/test-email', async (req, res) => {
+    try {
+        console.log('--- MANUAL EMAIL TEST INITIATED ---');
+        const mailOptions = {
+            from: `"Feastify Live Test" <${process.env.EMAIL_USER}>`,
+            to: 'thirumalaivasan944@gmail.com',
+            subject: 'Feastify Alert: Live Production Test',
+            text: `This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Render environment is configured correctly!`
+        };
+        const info = await transporter.sendMail(mailOptions);
+        res.status(200).json({ success: true, message: 'Email sent successfully!', messageId: info.messageId });
+    } catch (err) {
+        console.error('Manual Email Test Error:', err);
+        res.status(500).json({ success: false, message: 'SMTP Error: ' + err.message });
     }
-}
+});
 
 async function bootstrap() {
     const isConnected = await connectDB();
