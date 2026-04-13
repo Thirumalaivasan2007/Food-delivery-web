@@ -10,19 +10,23 @@ require('dotenv').config();
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
     port: 465,
-    secure: true, // Use SSL/TLS
+    secure: true, 
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        rejectUnauthorized: false // Helps with some cloud hosting certificate issues
-    }
+        // Do not fail on invalid certs - helps bypass strict cloud proxy issues
+        rejectUnauthorized: false 
+    },
+    connectionTimeout: 10000, // 10 seconds timeout
+    greetingTimeout: 10000 
 });
 
 // Admin Email Alert Helper
 const sendAdminAlert = async (subject, text) => {
     try {
+        const mailOptions = {
             from: `"Feastify Engine" <${process.env.EMAIL_USER}>`,
             to: 'thirumalaivasan944@gmail.com',
             subject: `Feastify Alert: ${subject}`,
