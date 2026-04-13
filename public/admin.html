@@ -332,9 +332,21 @@
                         <div class="text-[10px] text-gray-400 font-bold uppercase">${order.cartItems?.map(i => `${i.quantity || 1}x ${i.name}`).join(', ') || 'Item List'}</div>
                     </td>
                     <td class="px-6 py-6">
+                        <div class="font-bold text-gray-900 text-sm mb-1">${order.customerDetails?.name || 'Unknown User'}</div>
+                        <div class="flex items-center gap-2 text-[10px] text-gray-500 font-bold uppercase mb-1">
+                            <i class="ri-phone-fill text-primary"></i> ${order.customerDetails?.phone || 'No Phone'}
+                        </div>
+                        <div class="flex items-start gap-2 text-[10px] text-gray-400 font-medium italic">
+                            <i class="ri-map-pin-2-fill text-primary"></i> ${order.customerDetails?.address || 'No Address Provided'}
+                        </div>
+                    </td>
+                    <td class="px-6 py-6">
+                        <span class="text-[10px] font-black uppercase px-2 py-1 rounded bg-gray-100 text-gray-600 ring-1 ring-gray-200">
+                            ${order.paymentMethod || 'COD'}
+                        </span>
                     </td>
                     <td class="px-6 py-6 font-black text-gray-900 font-mono text-sm">₹${(order.totalAmount || 0).toFixed(2)}</td>
-                    <td class="px-6 py-6 text-center space-x-2 flex items-center justify-center h-full pt-8">
+                    <td class="px-6 py-6 text-center space-x-2 flex items-center justify-center">
                         <select onchange="updateOrderStatus('${order._id}', this.value)" class="bg-gray-50 border-0 rounded-xl px-4 py-2 text-[10px] font-black uppercase focus:ring-2 focus:ring-primary outline-none ${order.orderStatus === 'Delivered' ? 'text-green-600' : order.orderStatus === 'Cancelled' ? 'text-red-600' : 'text-gray-700'}">
                             <option value="Pending" ${order.orderStatus === 'Pending' ? 'selected' : ''}>⏳ Pending</option>
                             <option value="Preparing" ${order.orderStatus === 'Preparing' ? 'selected' : ''}>👨‍🍳 Preparing</option>
