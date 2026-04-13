@@ -3,60 +3,45 @@ const cors = require('cors');
 const path = require('path');
 const connectDB = require('./db');
 const bcrypt = require('bcryptjs');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Nodemailer Transporter Setup - Hardened for Render (Port 587 STARTTLS)
-const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-    port: 587,
-    secure: false, // STARTTLS
-    auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS
-    },
-    tls: {
-        rejectUnauthorized: false 
-    },
-    pool: true,              // Use pooled connections for automation
-    connectionTimeout: 30000, // 30 seconds timeout for reliability
-    greetingTimeout: 30000 
-});
-
-// Verify Transporter Connection on Startup
-transporter.verify((error, success) => {
-    if (error) {
-        console.error('CRITICAL: SMTP Connection Error:', error);
-    } else {
-        console.log('SUCCESS: SMTP Server is ready to take messages');
-    }
-});
+// Frontend Vercel Proxy URL
+const VERCEL_EMAIL_API = 'https://food-delivery-web-nine.vercel.app/api/send-email';
 
 // Startup Security Audit
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {
-    console.warn('WARNING: EMAIL_USER or EMAIL_PASS environment variables are missing! Email alerts will fail.');
+    console.warn('WARNING: Vercel architecture requires these vars configured in the VERCEL UI, not necessarily here, but local testing requires them.');
 }
 
-// Admin Email Alert Helper
+// Admin Email Alert Helper (Uses Vercel Proxy)
 const sendAdminAlert = async (subject, text) => {
     try {
-        const mailOptions = {
-            from: `"Feastify Engine" <${process.env.EMAIL_USER}>`,
-            to: 'thirumalaivasan944@gmail.com',
-            subject: `Feastify Alert: ${subject}`,
-            text: text,
-            html: `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+        const htmlContent = `<div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
                     <h2 style="color: #ff5a00;">Feastify System Alert</h2>
                     <p><strong>Event:</strong> ${subject}</p>
                     <p>${text}</p>
                     <hr/>
                     <small style="color: #888;">This is an automated security notification.</small>
-                   </div>`
-        };
-        await transporter.sendMail(mailOptions);
-        console.log(`Admin alert sent: ${subject}`);
+                   </div>`;
+
+        const response = await fetch(VERCEL_EMAIL_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject: `Feastify Alert: ${subject}`,
+                text: text,
+                html: htmlContent
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            console.log(`Admin alert sent via Vercel proxy: ${subject}`);
+        } else {
+            console.error('Vercel API failed to send alert:', data.message);
+        }
     } catch (err) {
-        console.error("Email Alert Error:", err.message);
+        console.error("Email Alert Proxy Error:", err.message);
     }
 };
 
@@ -603,21 +588,29 @@ async function syncCategories() {
     }
 }
 
-// Admin Test Email Route (Diagnostics)
+// Admin Test Email Route (Diagnostics via Vercel)
 app.get('/api/admin/test-email', async (req, res) => {
     try {
         console.log('--- MANUAL EMAIL TEST INITIATED ---');
-        const mailOptions = {
-            from: `"Feastify Live Test" <${process.env.EMAIL_USER}>`,
-            to: 'thirumalaivasan944@gmail.com',
-            subject: 'Feastify Alert: Live Production Test',
-            text: `This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Render environment is configured correctly!`
-        };
-        const info = await transporter.sendMail(mailOptions);
-        res.status(200).json({ success: true, message: 'Email sent successfully!', messageId: info.messageId });
+        const response = await fetch(VERCEL_EMAIL_API, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                subject: 'Feastify Alert: Live Production Test',
+                text: `This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Vercel Proxy environment is configured correctly!`,
+                html: `<h2 style="color: #ff5a00;">Feastify System Alert</h2><p>This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Vercel Proxy environment is configured correctly!</p>`
+            })
+        });
+
+        const data = await response.json();
+        if (data.success) {
+            res.status(200).json({ success: true, message: 'Email passed to Vercel proxy successfully!' });
+        } else {
+            res.status(500).json({ success: false, message: 'Vercel Proxy Error: ' + data.message });
+        }
     } catch (err) {
         console.error('Manual Email Test Error:', err);
-        res.status(500).json({ success: false, message: 'SMTP Error: ' + err.message });
+        res.status(500).json({ success: false, message: 'Fetch Proxy Error: ' + err.message });
     }
 });
 
