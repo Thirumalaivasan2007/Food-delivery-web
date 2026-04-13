@@ -6,21 +6,21 @@ const bcrypt = require('bcryptjs');
 const nodemailer = require('nodemailer');
 require('dotenv').config();
 
-// Nodemailer Transporter Setup - Hardened for Render
+// Nodemailer Transporter Setup - Hardened for Render (Port 587 STARTTLS)
 const transporter = nodemailer.createTransport({
     host: 'smtp.gmail.com',
-    port: 465,
-    secure: true, 
+    port: 587,
+    secure: false, // STARTTLS
     auth: {
         user: process.env.EMAIL_USER,
         pass: process.env.EMAIL_PASS
     },
     tls: {
-        // Do not fail on invalid certs - helps bypass strict cloud proxy issues
         rejectUnauthorized: false 
     },
-    connectionTimeout: 10000, // 10 seconds timeout
-    greetingTimeout: 10000 
+    pool: true,              // Use pooled connections for automation
+    connectionTimeout: 30000, // 30 seconds timeout for reliability
+    greetingTimeout: 30000 
 });
 
 // Verify Transporter Connection on Startup
@@ -338,6 +338,9 @@ app.post('/api/auth/login', async (req, res) => {
         // Security Notification: Admin Login
         if (user.role === 'admin') {
             await sendAdminAlert('Admin Login Alert', `A successful login to the Admin account (${email}) was detected at ${new Date().toLocaleString()}.`);
+        } else {
+            // Notification: Customer Login (Optional but requested)
+            await sendAdminAlert('Customer Login', `Customer ${user.name} (${email}) has logged in to Feastify.`);
         }
 
         res.status(200).json({ 
