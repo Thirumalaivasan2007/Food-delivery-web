@@ -33,9 +33,6 @@
             <button onclick="openUsersModal()" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-500 hover:bg-gray-50 transition-all text-left">
                 <i class="ri-user-line"></i> Registered Users
             </button>
-            <button onclick="App.testEmail(event)" class="w-full flex items-center gap-3 px-4 py-3 rounded-xl font-bold text-gray-400 border border-dashed border-gray-200 mt-4 hover:bg-gray-50 transition-all text-left text-[10px] uppercase tracking-widest">
-                <i class="ri-mail-send-line text-lg"></i> Send Test Alert
-            </button>
         </nav>
 
         <div class="p-4 border-t border-gray-50">
@@ -641,27 +638,6 @@
             localStorage.clear();
             window.location.href = '/';
         }
-
-        App.testEmail = async (event) => {
-            const btn = event.currentTarget || event.target;
-            const originalText = btn.innerHTML;
-            try {
-                btn.innerHTML = '<i class="ri-loader-4-line animate-spin"></i> Testing...';
-                btn.disabled = true;
-                const res = await fetch(`${API_BASE_URL}/api/admin/test-email`);
-                const data = await res.json();
-                if (data.success) {
-                    alert('SUCCESS: Email dispatched! Check thirumalaivasan944@gmail.com (including Spam).');
-                } else {
-                    alert('FAILURE: ' + data.message);
-                }
-            } catch (err) {
-                alert('CONNECTION ERROR: Could not reach backend: ' + err.message);
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        };
 
         // Init
         fetchDashboardData();

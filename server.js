@@ -588,32 +588,6 @@ async function syncCategories() {
     }
 }
 
-// Admin Test Email Route (Diagnostics via Vercel)
-app.get('/api/admin/test-email', async (req, res) => {
-    try {
-        console.log('--- MANUAL EMAIL TEST INITIATED ---');
-        const response = await fetch(VERCEL_EMAIL_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                subject: 'Feastify Alert: Live Production Test',
-                text: `This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Vercel Proxy environment is configured correctly!`,
-                html: `<h2 style="color: #ff5a00;">Feastify System Alert</h2><p>This is a manual diagnostic test sent from the live server at ${new Date().toLocaleString()}. If you see this, your Vercel Proxy environment is configured correctly!</p>`
-            })
-        });
-
-        const data = await response.json();
-        if (data.success) {
-            res.status(200).json({ success: true, message: 'Email passed to Vercel proxy successfully!' });
-        } else {
-            res.status(500).json({ success: false, message: 'Vercel Proxy Error: ' + data.message });
-        }
-    } catch (err) {
-        console.error('Manual Email Test Error:', err);
-        res.status(500).json({ success: false, message: 'Fetch Proxy Error: ' + err.message });
-    }
-});
-
 async function bootstrap() {
     const isConnected = await connectDB();
     
