@@ -431,7 +431,7 @@ app.post('/api/orders', async (req, res) => {
         console.log(`New Order Created: ${newOrder._id} | Payment: ${newOrder.paymentMethod}`);
         
         // Notification: New Order
-        sendAdminAlert('New Order Received', `Order #${newOrder._id.slice(-6).toUpperCase()} for ₹${newOrder.totalAmount} has been placed via ${newOrder.paymentMethod}.`);
+        sendAdminAlert('New Order Received', `Order #${newOrder._id.toString().slice(-6).toUpperCase()} for ₹${newOrder.totalAmount} has been placed via ${newOrder.paymentMethod}.`);
 
         res.status(201).json({ 
             success: true, 
