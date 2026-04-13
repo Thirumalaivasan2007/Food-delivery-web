@@ -4,7 +4,8 @@ require('dotenv').config();
 const connectDB = async () => {
     try {
         // Set a shorter timeout for local development to avoid long hangs
-        await mongoose.connect(process.env.MONGO_URI, {
+        const uri = process.env.MONGODB_URI || process.env.MONGO_URI;
+        await mongoose.connect(uri, {
             serverSelectionTimeoutMS: 5000, 
         });
         console.log('MongoDB connected successfully');
