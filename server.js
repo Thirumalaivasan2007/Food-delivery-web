@@ -6,7 +6,7 @@ const bcrypt = require('bcryptjs');
 require('dotenv').config();
 
 // Frontend Vercel Proxy URL
-const VERCEL_EMAIL_API = 'https://food-delivery-web-nine.vercel.app/api/send-email';
+const VERCEL_EMAIL_API = 'https://feastify-food-web.vercel.app/api/send-email';
 
 // Startup Security Audit
 if (!process.env.EMAIL_USER || !process.env.EMAIL_PASS) {

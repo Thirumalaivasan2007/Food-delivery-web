@@ -3,7 +3,7 @@
  * Shared utilities for the premium food delivery platform.
  */
 
-const API_BASE_URL = 'https://food-delivery-web-yo3r.onrender.com';
+const API_BASE_URL = 'https://feastify-web.onrender.com';
 
 const App = {
     // Auth Check
